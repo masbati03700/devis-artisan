@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devis & Factures Artisan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f5f5f5;color:#1a1a1a;max-width:420px;margin:0 auto;min-height:100vh;background:#fff}
+.screen{display:none}.screen.active{display:block}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #e8e8e8;background:#fff;position:sticky;top:0;z-index:10}
+.ttl{font-size:17px;font-weight:600;color:#1a1a1a}
+.sub{font-size:12px;color:#888;margin-top:2px}
+.sect{margin:0 16px 16px}
+.sect label{display:block;font-size:13px;color:#666;margin-bottom:6px;font-weight:500}
+input,textarea,select{width:100%;padding:11px 14px;font-size:15px;border:1px solid #ddd;border-radius:10px;background:#fff;color:#1a1a1a;font-family:inherit;outline:none;transition:border-color .2s}
+input:focus,textarea:focus{border-color:#1D9E75}
+textarea{min-height:75px;resize:none}
+.btn{display:block;width:calc(100% - 32px);margin:0 16px 10px;padding:14px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;border:none;text-align:center;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.85}
+.btn-green{background:#1D9E75;color:#fff}
+.btn-amber{background:#EF9F27;color:#fff}
+.btn-blue{background:#378ADD;color:#fff}
+.btn-outline{background:#f5f5f5;color:#1a1a1a;border:1px solid #e0e0e0}
+.btn-google{background:#fff;color:#3c4043;border:1px solid #dadce0;display:flex;align-items:center;justify-content:center;gap:10px;width:calc(100% - 32px);margin:0 16px 12px;padding:14px;border-radius:12px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit}
+.mic-wrap{display:flex;align-items:center;gap:10px;padding:13px;border:1px solid #ddd;border-radius:12px;cursor:pointer;margin-bottom:10px;background:#f9f9f9;transition:all .2s}
+.mic-wrap.on{background:#fff0f0;border-color:#e24b4a}
+.mic-wrap.on .mic-lbl{color:#a32d2d}
+.mic-lbl{font-size:15px;color:#444}
+.mic-icon{font-size:22px}
+.chip{display:inline-block;background:#f0f0f0;border:1px solid #e0e0e0;border-radius:20px;padding:6px 14px;font-size:13px;color:#555;margin:3px 3px 3px 0;cursor:pointer;transition:background .15s}
+.chip:hover{background:#e0f0ea;border-color:#1D9E75;color:#0f6e56}
+.dots{display:flex;align-items:center;justify-content:center;gap:7px;padding:3rem 0}
+.dot{width:9px;height:9px;border-radius:50%;background:#1D9E75;animation:bop 1s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes bop{0%,80%,100%{transform:scale(0.55);opacity:.35}40%{transform:scale(1);opacity:1}}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:14px;margin:0 16px 14px;padding:16px}
+.dhead{text-align:center;padding-bottom:12px;border-bottom:1px solid #eee;margin-bottom:12px}
+.dhead .co{font-size:14px;font-weight:600;color:#1a1a1a}
+.dhead .info{font-size:11px;color:#888;margin-top:3px}
+.dnum{margin-top:10px;font-size:13px;font-weight:600;color:#1a1a1a}
+.dref{font-size:11px;color:#1D9E75;margin-top:3px;font-weight:500}
+.dcli{font-size:13px;color:#666;margin-bottom:12px;line-height:1.5}
+.dcli strong{color:#1a1a1a;font-weight:600}
+.dsec{font-size:11px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px}
+.dline{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid #f0f0f0;gap:8px}
+.dline:last-of-type{border-bottom:none}
+.dline .lb{font-size:13px;color:#1a1a1a;flex:1;line-height:1.4}
+.dline .am{font-size:13px;font-weight:600;color:#1a1a1a;white-space:nowrap}
+.dline .pct{font-size:11px;color:#1D9E75;font-weight:500;margin-left:4px}
+.dtotal{display:flex;justify-content:space-between;padding:12px 0 0;margin-top:8px;border-top:2px solid #1a1a1a}
+.dtotal .lb{font-size:16px;font-weight:600;color:#1a1a1a}
+.dtotal .am{font-size:22px;font-weight:700;color:#1D9E75}
+.tva{font-size:11px;color:#aaa;text-align:center;margin-top:6px}
+.acp{background:#f0faf6;border-radius:8px;padding:10px 12px;font-size:13px;color:#555;margin-top:10px;line-height:1.5}
+.acp strong{color:#0f6e56}
+.sign-zone{margin-top:12px;padding-top:12px;border-top:1px solid #eee}
+.sign-zone .lb{font-size:12px;color:#888}
+.sign-line{height:40px;border-bottom:1px dashed #ccc;margin-top:8px}
+.hitem{display:flex;justify-content:space-between;align-items:flex-start;padding:12px 0;border-bottom:1px solid #f0f0f0;cursor:pointer}
+.hitem:last-child{border-bottom:none}
+.htitle{font-size:14px;color:#1a1a1a;font-weight:600}
+.hsub{font-size:12px;color:#888;margin-top:3px}
+.ham{font-size:14px;font-weight:600;color:#1D9E75;white-space:nowrap;margin-left:8px}
+.badge{display:inline-block;font-size:11px;padding:2px 9px;border-radius:20px;margin-left:6px;font-weight:500}
+.bf{background:#e1f5ee;color:#085041}
+.bd{background:#faeeda;color:#633806}
+.ba{background:#e6f1fb;color:#0c447c}
+.drive-info{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f0faf6;border-radius:10px;margin:0 16px 14px;font-size:13px;color:#555}
+.drive-info .icon{font-size:20px}
+.num-pill{display:inline-block;background:#e1f5ee;color:#085041;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600}
+.num-pill-f{display:inline-block;background:#e6f1fb;color:#0c447c;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:600}
+.avg-box{background:#f0faf6;border-radius:10px;padding:12px 14px;margin:0 16px 14px;font-size:14px;color:#555;text-align:center}
+.avg-box strong{color:#1D9E75;font-size:20px;font-weight:700}
+.pct-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid #f0f0f0}
+.pct-row:last-child{border-bottom:none}
+.pct-row .lbl{font-size:13px;color:#1a1a1a;flex:1;line-height:1.4}
+.pct-row input{width:75px;padding:7px 10px;font-size:14px;text-align:center;border-radius:8px}
+.settrow{display:flex;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;gap:10px}
+.settrow:last-child{border-bottom:none}
+.settrow label{font-size:13px;color:#666;white-space:nowrap;min-width:80px;font-weight:500}
+.settrow input{flex:1;padding:7px 10px;font-size:13px;border-radius:8px}
+.deduc-line{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;color:#666}
+.deduc-final{font-size:16px;font-weight:700;color:#1a1a1a;padding-top:10px;margin-top:6px;border-top:2px solid #1a1a1a;display:flex;justify-content:space-between}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap}
+.toast.show{opacity:1}
+.hero-icon{font-size:56px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="sLogin" class="screen active">
+  <div style="padding:3rem 16px 1.5rem;text-align:center">
+    <div class="hero-icon">🧱</div>
+    <div style="font-size:22px;font-weight:700;color:#1a1a1a">Devis & Factures</div>
+    <div style="font-size:14px;color:#888;margin-top:6px;line-height:1.6">Générez vos documents par la voix<br>et sauvegardez-les dans Google Drive</div>
+  </div>
+  <div style="margin-top:1.5rem">
+    <button class="btn-google" onclick="connectGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+      Se connecter avec Google Drive
+    </button>
+    <div style="font-size:12px;color:#aaa;text-align:center;padding:0 24px;line-height:1.6">
+      Vos documents seront sauvegardés dans<br><strong style="color:#555">DEVIS &amp; FACTURES 2026</strong>
+    </div>
+  </div>
+</div>
+
+<!-- HOME -->
+<div id="sHome" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">🧱 Artisan</div><div class="sub" id="userEmail"></div></div>
+    <div style="font-size:12px;color:#1D9E75;font-weight:500">✓ Drive connecté</div>
+  </div>
+  <div style="height:16px"></div>
+  <div class="drive-info">
+    <span class="icon">📁</span>
+    <div>Devis : <span id="nextNum" class="num-pill">—</span> &nbsp; Facture : <span id="nextFNum" class="num-pill-f">—</span></div>
+  </div>
+  <button class="btn btn-green" onclick="goScreen('sNew')">+ Nouveau devis</button>
+  <button class="btn btn-amber" onclick="goScreen('sAvSelect');showAvSelectList()">📈 Facture d'avancement</button>
+  <button class="btn btn-outline" onclick="goScreen('sHist')">📋 Historique</button>
+  <button class="btn btn-outline" onclick="goScreen('sSett')">⚙️ Paramètres entreprise</button>
+</div>
+
+<!-- NOUVEAU DEVIS -->
+<div id="sNew" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Nouveau devis</div><div class="sub">Client et travaux</div></div>
+    <button onclick="goScreen('sHome')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:16px"></div>
+  <div class="sect"><label>Nom du client</label><input type="text" id="cName" placeholder="M. et Mme Martin"/></div>
+  <div class="sect"><label>Adresse</label><input type="text" id="cAddr" placeholder="12 rue de la Paix, 03200 Vichy"/></div>
+  <div class="sect">
+    <label>Travaux (dictez ou tapez)</label>
+    <div class="mic-wrap" id="micBtn" onclick="toggleMic('tDesc','micBtn','micLbl')">
+      <span class="mic-icon">🎙️</span>
+      <span class="mic-lbl" id="micLbl">Appuyer pour dicter</span>
+    </div>
+    <textarea id="tDesc" placeholder="Ex : ravalement façade, purge fissures, enduit 2 couches, fournitures ciment armatures..."></textarea>
+    <div style="margin-top:10px">
+      <span class="chip" onclick="addChip('Ravalement de façade')">Ravalement</span>
+      <span class="chip" onclick="addChip('Maçonnerie et fondations')">Maçonnerie</span>
+      <span class="chip" onclick="addChip('Enduit intérieur et extérieur')">Enduit</span>
+      <span class="chip" onclick="addChip('Pose carrelage')">Carrelage</span>
+      <span class="chip" onclick="addChip('Mur de clôture')">Clôture</span>
+      <span class="chip" onclick="addChip('Rénovation salle de bain')">Salle de bain</span>
+    </div>
+  </div>
+  <button class="btn btn-green" onclick="genDevis()">✨ Générer le devis avec l'IA</button>
+</div>
+
+<!-- LOADING -->
+<div id="sLoad" class="screen">
+  <div class="topbar"><div><div class="ttl">Génération en cours…</div><div class="sub" id="loadMsg">Analyse des travaux…</div></div></div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+
+<!-- DEVIS RESULT -->
+<div id="sDevis" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Devis prêt</div><div class="sub" id="devisNumLbl"></div></div>
+    <button onclick="goScreen('sNew')" style="background:none;border:none;font-size:15px;cursor:pointer;color:#888;font-weight:500">✏️</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="card" id="devisCard"></div>
+  <button class="btn btn-green" onclick="saveDoc('devis')">💾 Sauvegarder dans Drive</button>
+  <button class="btn btn-amber" onclick="goToAvancement()">📈 Facture d'avancement</button>
+  <button class="btn btn-blue" onclick="goToFactureFinale()">🧾 Facture finale</button>
+  <button class="btn btn-outline" onclick="goScreen('sNew')">✏️ Modifier</button>
+</div>
+
+<!-- AVANCEMENT SELECT -->
+<div id="sAvSelect" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Facture d'avancement</div><div class="sub">Choisir le devis</div></div>
+    <button onclick="goScreen('sHome')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:12px"></div>
+  <div style="margin:0 16px" id="avSelectList"></div>
+</div>
+
+<!-- AVANCEMENT SAISIE -->
+<div id="sAvancement" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Avancement travaux</div><div class="sub" id="avDevisRef"></div></div>
+    <button onclick="goScreen('sHome')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="sect">
+    <label>Dictez les % par rubrique</label>
+    <div class="mic-wrap" id="micBtnAv" onclick="toggleMic('avDesc','micBtnAv','micLblAv')">
+      <span class="mic-icon">🎙️</span>
+      <span class="mic-lbl" id="micLblAv">Appuyer pour dicter</span>
+    </div>
+    <textarea id="avDesc" placeholder="Ex : prestations à 75 pour cent, matériaux à 50 pour cent"></textarea>
+  </div>
+  <div style="margin:0 16px 16px;font-size:13px;color:#666;font-weight:500">Ou saisissez manuellement :</div>
+  <div style="margin:0 16px 16px" id="avPctRows"></div>
+  <div class="avg-box" id="avgBox" style="display:none">Avancement moyen : <strong id="avgVal">0%</strong></div>
+  <button class="btn btn-amber" onclick="genAvancement()">✨ Calculer avec l'IA</button>
+</div>
+
+<!-- AVANCEMENT RESULT -->
+<div id="sAvResult" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Facture d'avancement</div><div class="sub" id="avNumLbl"></div></div>
+    <button onclick="goScreen('sAvancement')" style="background:none;border:none;font-size:15px;cursor:pointer;color:#888">✏️</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="card" id="avCard"></div>
+  <button class="btn btn-amber" onclick="saveDoc('avancement')">💾 Sauvegarder dans Drive</button>
+  <button class="btn btn-outline" onclick="goScreen('sHome')">🏠 Accueil</button>
+</div>
+
+<!-- FACTURE FINALE -->
+<div id="sFactureFinale" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Facture finale</div><div class="sub" id="ffNumLbl"></div></div>
+    <button onclick="goScreen('sDevis')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="card" id="ffCard"></div>
+  <button class="btn btn-green" onclick="saveDoc('finale')">💾 Sauvegarder dans Drive</button>
+  <button class="btn btn-outline" onclick="goScreen('sHome')">🏠 Accueil</button>
+</div>
+
+<!-- SAVE -->
+<div id="sSave" class="screen">
+  <div class="topbar"><div><div class="ttl">Sauvegarde…</div><div class="sub" id="saveMsg">Envoi vers Drive…</div></div></div>
+  <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+
+<!-- DONE -->
+<div id="sDone" class="screen">
+  <div class="topbar"><div><div class="ttl">✅ Sauvegardé !</div><div class="sub" id="doneFile"></div></div></div>
+  <div style="text-align:center;padding:2rem 16px">
+    <div style="font-size:56px">✅</div>
+    <div style="font-size:15px;color:#555;margin-top:12px;line-height:1.6" id="donePath"></div>
+    <div style="font-size:12px;color:#aaa;margin-top:8px" id="doneNext"></div>
+  </div>
+  <button class="btn btn-green" onclick="shareWA()">💬 Partager par WhatsApp</button>
+  <button class="btn btn-outline" onclick="goScreen('sHome')">🏠 Accueil</button>
+  <button class="btn btn-outline" onclick="goScreen('sHist')">📋 Historique</button>
+</div>
+
+<!-- HISTORIQUE -->
+<div id="sHist" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Historique</div><div class="sub">Tous les documents</div></div>
+    <button onclick="goScreen('sHome')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:12px"></div>
+  <div style="margin:0 16px" id="histList"></div>
+</div>
+
+<!-- PARAMETRES -->
+<div id="sSett" class="screen">
+  <div class="topbar">
+    <div><div class="ttl">Paramètres</div><div class="sub">Informations entreprise</div></div>
+    <button onclick="goScreen('sHome')" style="background:none;border:none;font-size:22px;cursor:pointer;color:#888">×</button>
+  </div>
+  <div style="height:12px"></div>
+  <div class="card">
+    <div class="settrow"><label>Entreprise</label><input type="text" id="sNom"/></div>
+    <div class="settrow"><label>SIRET</label><input type="text" id="sSiret"/></div>
+    <div class="settrow"><label>Téléphone</label><input type="text" id="sTel"/></div>
+    <div class="settrow"><label>Email</label><input type="text" id="sEmail2"/></div>
+    <div class="settrow"><label>Adresse</label><input type="text" id="sAdresse"/></div>
+    <div class="settrow"><label>Assurance</label><input type="text" id="sAssurance"/></div>
+  </div>
+  <button class="btn btn-green" onclick="saveSett()">✓ Enregistrer</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CLIENT_ID='36278571106-g485vlhc3l6hq1604m0lv7mu4h8oirkn.apps.googleusercontent.com';
+const SCOPES='https://www.googleapis.com/auth/drive.file';
+const YEAR=new Date().getFullYear();
+const ROOT_NAME='DEVIS & FACTURES '+YEAR;
+const COUNTER_FILE='compteur_'+YEAR+'.txt';
+
+let G={
+  token:null,user:null,rootId:null,counterId:null,
+  devisCounter:1,factureCounter:1,
+  currentDevis:null,currentAv:null,currentFF:null,
+  activeDevisForAv:null,
+  history:[],waMsg:'',
+  sett:{nom:'MAS BATI — Maçonnerie Façade',siret:'920 100 203 00016',tel:'06 89 69 58 63',email:'masbati03700@gmail.com',adresse:'13 rue Jean Moulin — 03700 Bellerive-sur-Allier',assurance:'AXELIANCE-BEAZLEY-AMTRUST N° CRCD01-014115'}
+};
+
+function goScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function eur(n){return Number(n).toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});}
+function pad(n){return String(n).padStart(3,'0');}
+function dCode(n){return YEAR+'-'+pad(n);}
+function fCode(n){return YEAR+'-F'+pad(n);}
+function updateNums(){document.getElementById('nextNum').textContent=dCode(G.devisCounter);document.getElementById('nextFNum').textContent=fCode(G.factureCounter);}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function loadLocalSett(){
+  try{const s=JSON.parse(localStorage.getItem('art_sett4'));if(s)G.sett=s;}catch(e){}
+  try{G.history=JSON.parse(localStorage.getItem('art_hist4')||'[]');}catch(e){}
+  document.getElementById('sNom').value=G.sett.nom;
+  document.getElementById('sSiret').value=G.sett.siret;
+  document.getElementById('sTel').value=G.sett.tel;
+  document.getElementById('sEmail2').value=G.sett.email;
+  document.getElementById('sAdresse').value=G.sett.adresse;
+  document.getElementById('sAssurance').value=G.sett.assurance;
+}
+
+function saveSett(){
+  G.sett={nom:document.getElementById('sNom').value,siret:document.getElementById('sSiret').value,tel:document.getElementById('sTel').value,email:document.getElementById('sEmail2').value,adresse:document.getElementById('sAdresse').value,assurance:document.getElementById('sAssurance').value};
+  try{localStorage.setItem('art_sett4',JSON.stringify(G.sett));}catch(e){}
+  showToast('Paramètres enregistrés');
+  goScreen('sHome');
+}
+
+function connectGoogle(){
+  // Vérifie si on revient d'un redirect OAuth (token dans le hash de l'URL)
+  const hash=window.location.hash||window.location.search;
+  if(hash&&hash.includes('access_token')){
+    const p=new URLSearchParams(hash.replace(/^[#?]/,''));
+    G.token=p.get('access_token');
+    if(G.token){afterLogin();return;}
+  }
+  // Sinon, lancer le flux OAuth — redirige la page courante
+  const REDIRECT='https://masbati03700.github.io/devis-artisan/';
+  const params=new URLSearchParams({client_id:CLIENT_ID,redirect_uri:REDIRECT,response_type:'token',scope:SCOPES,prompt:'select_account'});
+  window.location.href='https://accounts.google.com/o/oauth2/v2/auth?'+params;
+}
+
+async function afterLogin(){
+  try{
+    const r=await fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{Authorization:'Bearer '+G.token}});
+    const u=await r.json();G.user=u;
+    document.getElementById('userEmail').textContent=u.email||'';
+    showToast('Connexion réussie !');
+    await ensureRoot();
+    await syncCounter();
+    loadLocalSett();renderHist();updateNums();
+    goScreen('sHome');
+  }catch(e){alert('Erreur de connexion : '+e.message);}
+}
+
+async function ensureRoot(){
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D'${encodeURIComponent(ROOT_NAME)}'+and+mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+G.token}});
+  const d=await r.json();
+  if(d.files&&d.files.length>0){G.rootId=d.files[0].id;}
+  else{
+    const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+G.token,'Content-Type':'application/json'},body:JSON.stringify({name:ROOT_NAME,mimeType:'application/vnd.google-apps.folder'})});
+    G.rootId=(await cr.json()).id;
+  }
+}
+
+async function ensureClientFolder(clientName){
+  const safe=clientName.replace(/[^\w\sÀ-ÿ\-]/g,'').trim();
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D'${encodeURIComponent(safe)}'+and+'${G.rootId}'+in+parents+and+mimeType%3D'application%2Fvnd.google-apps.folder'+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+G.token}});
+  const d=await r.json();
+  if(d.files&&d.files.length>0)return d.files[0].id;
+  const cr=await fetch('https://www.googleapis.com/drive/v3/files',{method:'POST',headers:{Authorization:'Bearer '+G.token,'Content-Type':'application/json'},body:JSON.stringify({name:safe,mimeType:'application/vnd.google-apps.folder',parents:[G.rootId]})});
+  return(await cr.json()).id;
+}
+
+async function syncCounter(){
+  const r=await fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D'${COUNTER_FILE}'+and+'${G.rootId}'+in+parents+and+trashed%3Dfalse&fields=files(id)`,{headers:{Authorization:'Bearer '+G.token}});
+  const d=await r.json();
+  if(d.files&&d.files.length>0){
+    G.counterId=d.files[0].id;
+    const fr=await fetch(`https://www.googleapis.com/drive/v3/files/${G.counterId}?alt=media`,{headers:{Authorization:'Bearer '+G.token}});
+    try{const data=JSON.parse(await fr.text());G.devisCounter=data.devis||1;G.factureCounter=data.facture||1;}catch(e){}
+  }else{await writeCounter();}
+}
+
+async function writeCounter(){
+  const content=JSON.stringify({devis:G.devisCounter,facture:G.factureCounter});
+  if(G.counterId){
+    await fetch(`https://www.googleapis.com/upload/drive/v3/files/${G.counterId}?uploadType=media`,{method:'PATCH',headers:{Authorization:'Bearer '+G.token,'Content-Type':'text/plain'},body:content});
+  }else{
+    const meta={name:COUNTER_FILE,parents:[G.rootId],mimeType:'text/plain'};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',new Blob([content],{type:'text/plain'}));
+    const cr=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id',{method:'POST',headers:{Authorization:'Bearer '+G.token},body:form});
+    G.counterId=(await cr.json()).id;
+  }
+}
+
+let recogActive=null,isRec=false,currentMicTarget=null;
+function toggleMic(targetId,btnId,lblId){
+  if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){alert('Dictée vocale : utilisez Chrome ou Edge.');return;}
+  if(isRec&&currentMicTarget===targetId){recogActive.stop();return;}
+  if(isRec)recogActive.stop();
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  recogActive=new SR();recogActive.lang='fr-FR';recogActive.continuous=true;recogActive.interimResults=true;
+  currentMicTarget=targetId;
+  recogActive.onstart=()=>{isRec=true;document.getElementById(btnId).classList.add('on');document.getElementById(lblId).textContent='🔴 Dictée en cours… (retaper pour arrêter)';};
+  recogActive.onresult=e=>{let t='';for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;document.getElementById(targetId).value=t;};
+  recogActive.onend=()=>{isRec=false;document.getElementById(btnId).classList.remove('on');document.getElementById(lblId).textContent='Appuyer pour dicter';};
+  recogActive.start();
+}
+
+function addChip(t){const el=document.getElementById('tDesc');el.value=el.value?el.value+', '+t:t;}
+
+async function callAI(prompt){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
+  const data=await res.json();
+  if(data.error)throw new Error(data.error.message);
+  return data.content.map(i=>i.text||'').join('').replace(/```json|```/g,'').trim();
+}
+
+async function genDevis(){
+  const name=document.getElementById('cName').value.trim();
+  const addr=document.getElementById('cAddr').value.trim();
+  const desc=document.getElementById('tDesc').value.trim();
+  if(!name||!desc){alert('Renseignez le nom du client et les travaux.');return;}
+  goScreen('sLoad');
+  const msgs=['Analyse des travaux…','Calcul des montants…','Rédaction du devis…'];
+  let mi=0;const t=setInterval(()=>{document.getElementById('loadMsg').textContent=msgs[mi++%msgs.length];},1200);
+  try{
+    const num=dCode(G.devisCounter);
+    const raw=await callAI(`Tu es assistant pour un artisan maçon auto-entrepreneur exonéré de TVA (art.293B CGI). Génère un devis JSON uniquement, sans texte avant/après, sans backticks.\n\nTravaux : "${desc}"\n\nRègles :\n- Sépare prestations de service et matériaux/fournitures\n- Pas de quantités ni taux horaires dans les libellés\n- Libellés professionnels\n- Montants réalistes pour maçon en France\n- Acompte = 30% du total\n\nJSON attendu :\n{"lignes":[{"cat":"prestation","lib":"...","mt":0},{"cat":"materiau","lib":"...","mt":0}],"totPrest":0,"totMat":0,"total":0,"acompte":0}`);
+    clearInterval(t);
+    const d=JSON.parse(raw);
+    G.currentDevis={...d,client:name,adresse:addr,date:new Date().toLocaleDateString('fr-FR'),num,type:'devis',facturesAv:[]};
+    document.getElementById('devisNumLbl').textContent='N° '+num;
+    renderDocCard(G.currentDevis,'devisCard','DEVIS');
+    goScreen('sDevis');
+  }catch(e){clearInterval(t);alert('Erreur : '+e.message);goScreen('sNew');}
+}
+
+function renderDocCard(d,cardId,titre){
+  const prest=d.lignes.filter(l=>l.cat==='prestation');
+  const mats=d.lignes.filter(l=>l.cat==='materiau');
+  let h=`<div class="dhead">
+    <div class="co">${G.sett.nom}</div>
+    <div class="info">${G.sett.adresse}</div>
+    <div class="info">Tél : ${G.sett.tel} · SIRET : ${G.sett.siret}</div>
+    <div class="dnum">${titre} N° ${d.num}</div>`;
+  if(d.devisRef)h+=`<div class="dref">Réf. devis : ${d.devisRef}</div>`;
+  h+=`<div class="info" style="margin-top:4px">Le ${d.date}</div></div>
+  <div class="dcli"><strong>${d.client}</strong><br>${d.adresse}</div>`;
+  if(prest.length){
+    h+=`<div class="dsec">Prestations de service</div>`;
+    prest.forEach(l=>{let extra=l.pct!==undefined?`<span class="pct"> ${l.pct}%</span>`:'';h+=`<div class="dline"><span class="lb">${l.lib}${extra}</span><span class="am">${eur(l.mt)}</span></div>`;});
+    h+=`<div class="dline"><span class="lb" style="font-size:12px;color:#999">Sous-total prestations</span><span class="am" style="font-size:12px;color:#999">${eur(d.totPrest)}</span></div>`;
+  }
+  if(mats.length){
+    h+=`<div class="dsec">Matériaux et fournitures</div>`;
+    mats.forEach(l=>{let extra=l.pct!==undefined?`<span class="pct"> ${l.pct}%</span>`:'';h+=`<div class="dline"><span class="lb">${l.lib}${extra}</span><span class="am">${eur(l.mt)}</span></div>`;});
+    h+=`<div class="dline"><span class="lb" style="font-size:12px;color:#999">Sous-total matériaux</span><span class="am" style="font-size:12px;color:#999">${eur(d.totMat)}</span></div>`;
+  }
+  if(titre==='FACTURE D\'AVANCEMENT'&&d.avgPct!==undefined){
+    h+=`<div class="dsec">Calcul d'avancement</div>
+    <div class="dline"><span class="lb">Avancement moyen des travaux</span><span class="am">${Math.round(d.avgPct)}%</span></div>
+    <div class="dline"><span class="lb">Montant (${Math.round(d.avgPct)}% de ${eur(d.totalDevis)})</span><span class="am">${eur(d.montantBrut)}</span></div>`;
+  }
+  h+=`<div class="dtotal"><span class="lb">Total</span><span class="am">${eur(d.total)}</span></div>
+  <div class="tva">TVA non applicable — article 293B du CGI</div>`;
+  if(titre==='DEVIS'){
+    h+=`<div class="acp">Acompte 30% au démarrage : <strong>${eur(d.acompte)}</strong></div>`;
+    h+=`<div class="sign-zone"><div class="lb">Assurance décennale : ${G.sett.assurance}</div></div>`;
+    h+=`<div class="sign-zone"><div class="lb">Bon pour accord — Signature du client :</div><div class="sign-line"></div></div>`;
+  }else if(titre==='FACTURE D\'AVANCEMENT'){
+    h+=`<div class="acp">Acompte versé au démarrage : <strong>${eur(d.acompte)}</strong><br>Net à payer cette facture : <strong>${eur(d.total)}</strong></div>`;
+    h+=`<div class="sign-zone"><div class="lb">Assurance décennale : ${G.sett.assurance}</div></div>`;
+  }else if(titre==='FACTURE FINALE'){
+    h+=`<div class="dsec">Déductions</div>`;
+    d.deductions.forEach(dd=>h+=`<div class="deduc-line"><span>${dd.label}</span><span style="color:#e24b4a">− ${eur(dd.mt)}</span></div>`);
+    h+=`<div class="deduc-final"><span>Solde final à régler</span><span style="color:#1D9E75">${eur(d.solde)}</span></div>`;
+    h+=`<div class="sign-zone"><div class="lb">Assurance décennale : ${G.sett.assurance}</div></div>`;
+  }
+  document.getElementById(cardId).innerHTML=h;
+}
+
+function goToAvancement(){G.activeDevisForAv=G.currentDevis;showAvancement(G.currentDevis);}
+
+function showAvSelectList(){
+  const items=G.history.filter(h=>h.type==='devis');
+  if(!items.length){document.getElementById('avSelectList').innerHTML='<div style="text-align:center;padding:2rem;color:#888;font-size:14px">Aucun devis enregistré</div>';return;}
+  document.getElementById('avSelectList').innerHTML=items.map((d,i)=>`
+    <div class="hitem" onclick="selectDevisForAv(${i})">
+      <div><div class="htitle">${d.client}</div><div class="hsub">Devis N° ${d.num} · ${d.date} · ${eur(d.total)}</div></div>
+      <div style="font-size:20px">›</div>
+    </div>`).join('');
+}
+
+function selectDevisForAv(idx){
+  const items=G.history.filter(h=>h.type==='devis');
+  G.activeDevisForAv=items[idx];
+  showAvancement(G.activeDevisForAv);
+}
+
+function showAvancement(d){
+  document.getElementById('avDevisRef').textContent='Devis N° '+d.num+' — '+d.client;
+  document.getElementById('avPctRows').innerHTML=d.lignes.map((l,i)=>`
+    <div class="pct-row">
+      <span class="lbl">${l.lib}</span>
+      <input type="number" id="pct_${i}" min="0" max="100" placeholder="%" oninput="calcAvg()"/>
+    </div>`).join('');
+  document.getElementById('avDesc').value='';
+  document.getElementById('avgBox').style.display='none';
+  goScreen('sAvancement');
+}
+
+function calcAvg(){
+  const d=G.activeDevisForAv;
+  const vals=d.lignes.map((_,i)=>{const v=parseFloat(document.getElementById('pct_'+i).value);return isNaN(v)?null:v;}).filter(v=>v!==null);
+  if(!vals.length){document.getElementById('avgBox').style.display='none';return;}
+  const avg=vals.reduce((a,b)=>a+b,0)/vals.length;
+  document.getElementById('avgVal').textContent=Math.round(avg*10)/10+'%';
+  document.getElementById('avgBox').style.display='block';
+}
+
+async function genAvancement(){
+  const d=G.activeDevisForAv;
+  const desc=document.getElementById('avDesc').value.trim();
+  goScreen('sLoad');document.getElementById('loadMsg').textContent='Interprétation des pourcentages…';
+  try{
+    let pcts;
+    if(desc){
+      const raw=await callAI(`Extrais les pourcentages d'avancement depuis : "${desc}"\n\nRubriques :\n${d.lignes.map((l,i)=>`${i}: ${l.lib}`).join('\n')}\n\nRéponds UNIQUEMENT avec {"pcts":[...]} un nombre 0-100 par rubrique dans l'ordre. Sans texte ni backticks.`);
+      pcts=JSON.parse(raw).pcts;
+    }else{
+      pcts=d.lignes.map((_,i)=>{const v=parseFloat(document.getElementById('pct_'+i).value);return isNaN(v)?0:v;});
+    }
+    const avg=pcts.reduce((a,b)=>a+b,0)/pcts.length;
+    const lignesAv=d.lignes.map((l,i)=>({...l,pct:Math.round(pcts[i]),mt:Math.round(l.mt*pcts[i]/100)}));
+    const totPrest=lignesAv.filter(l=>l.cat==='prestation').reduce((a,l)=>a+l.mt,0);
+    const totMat=lignesAv.filter(l=>l.cat==='materiau').reduce((a,l)=>a+l.mt,0);
+    const montantBrut=Math.round(d.total*avg/100);
+    const dejaPaye=(d.facturesAv||[]).reduce((a,f)=>a+f.total,0)+d.acompte;
+    const fnum=fCode(G.factureCounter);
+    G.currentAv={
+      lignes:lignesAv,totPrest,totMat,
+      totalDevis:d.total,avgPct:avg,montantBrut,
+      total:Math.max(0,montantBrut-dejaPaye),
+      acompte:d.acompte,
+      client:d.client,adresse:d.adresse,
+      date:new Date().toLocaleDateString('fr-FR'),
+      num:fnum,type:'avancement',devisRef:d.num,pcts
+    };
+    document.getElementById('avNumLbl').textContent='N° '+fnum+' · Réf. devis '+d.num;
+    renderDocCard(G.currentAv,'avCard','FACTURE D\'AVANCEMENT');
+    goScreen('sAvResult');
+  }catch(e){alert('Erreur : '+e.message);goScreen('sAvancement');}
+}
+
+function goToFactureFinale(){
+  const d=G.currentDevis;
+  const fnum=fCode(G.factureCounter);
+  const avHist=G.history.filter(h=>h.type==='avancement'&&h.devisRef===d.num);
+  const deductions=[];
+  let totalDeduc=0;
+  deductions.push({label:'Acompte versé au démarrage',mt:d.acompte});totalDeduc+=d.acompte;
+  avHist.forEach(av=>{deductions.push({label:'Facture avancement N° '+av.num,mt:av.total});totalDeduc+=av.total;});
+  G.currentFF={
+    lignes:d.lignes,totPrest:d.totPrest,totMat:d.totMat,
+    total:d.total,acompte:d.acompte,
+    client:d.client,adresse:d.adresse,
+    date:new Date().toLocaleDateString('fr-FR'),
+    num:fnum,type:'finale',devisRef:d.num,
+    deductions,solde:Math.max(0,d.total-totalDeduc)
+  };
+  document.getElementById('ffNumLbl').textContent='N° '+fnum+' · Réf. devis '+d.num;
+  renderDocCard(G.currentFF,'ffCard','FACTURE FINALE');
+  goScreen('sFactureFinale');
+}
+
+async function saveDoc(type){
+  if(!G.token){alert('Non connecté à Google Drive.');return;}
+  goScreen('sSave');
+  const doc=type==='devis'?G.currentDevis:type==='avancement'?G.currentAv:G.currentFF;
+  const titreMap={devis:'DEVIS',avancement:'FACTURE_AVANCEMENT',finale:'FACTURE_FINALE'};
+  const titre=titreMap[type];
+  try{
+    document.getElementById('saveMsg').textContent='Dossier client…';
+    const clientFolderId=await ensureClientFolder(doc.client);
+    document.getElementById('saveMsg').textContent='Mise à jour compteur…';
+    if(type==='devis')G.devisCounter++;else G.factureCounter++;
+    await writeCounter();
+    document.getElementById('saveMsg').textContent='Envoi du fichier…';
+    const fname=`${titre}_${doc.num}_${doc.client.replace(/\s+/g,'_')}_${doc.date.replace(/\//g,'-')}.txt`;
+    const content=buildText(doc,titre.replace(/_/g,' '));
+    const meta={name:fname,parents:[clientFolderId],mimeType:'text/plain'};
+    const form=new FormData();
+    form.append('metadata',new Blob([JSON.stringify(meta)],{type:'application/json'}));
+    form.append('file',new Blob([content],{type:'text/plain'}));
+    const r=await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart',{method:'POST',headers:{Authorization:'Bearer '+G.token},body:form});
+    if(!r.ok)throw new Error('Erreur upload Drive');
+    if(type==='avancement'&&G.currentDevis){if(!G.currentDevis.facturesAv)G.currentDevis.facturesAv=[];G.currentDevis.facturesAv.push(doc);}
+    G.history.unshift({...doc,fname,type});
+    try{localStorage.setItem('art_hist4',JSON.stringify(G.history.slice(0,100)));}catch(e){}
+    renderHist();updateNums();
+    const clientSafe=doc.client.replace(/[^\w\sÀ-ÿ\-]/g,'').trim();
+    document.getElementById('doneFile').textContent=fname;
+    document.getElementById('donePath').textContent='📁 '+ROOT_NAME+'\n   └ '+clientSafe;
+    document.getElementById('doneNext').textContent=type==='devis'?'Prochain devis : '+dCode(G.devisCounter):'Prochaine facture : '+fCode(G.factureCounter);
+    G.waMsg=type==='devis'
+      ?`Bonjour,\n\nVeuillez trouver votre devis N°${doc.num} pour un montant de ${eur(doc.total)}.\nAcompte de 30% au démarrage : ${eur(doc.acompte)}.\n\nCordialement,\n${G.sett.nom}`
+      :type==='avancement'
+      ?`Bonjour,\n\nVeuillez trouver votre facture d'avancement N°${doc.num} (Réf. devis ${doc.devisRef}).\nMontant : ${eur(doc.total)}.\n\nCordialement,\n${G.sett.nom}`
+      :`Bonjour,\n\nVeuillez trouver votre facture finale N°${doc.num} (Réf. devis ${doc.devisRef}).\nSolde à régler : ${eur(doc.solde)}.\n\nCordialement,\n${G.sett.nom}`;
+    goScreen('sDone');
+  }catch(e){alert('Erreur : '+e.message);goScreen(type==='devis'?'sDevis':type==='avancement'?'sAvResult':'sFactureFinale');}
+}
+
+function buildText(d,titre){
+  let t=`${G.sett.nom}\n${G.sett.adresse}\nTél : ${G.sett.tel} | Email : ${G.sett.email}\nSIRET : ${G.sett.siret}\n`;
+  t+=`${'─'.repeat(45)}\n${titre} N° ${d.num}`;
+  if(d.devisRef)t+=` | Réf. devis : ${d.devisRef}`;
+  t+=`\nDate : ${d.date}\n${'─'.repeat(45)}\n`;
+  t+=`CLIENT : ${d.client}\n${d.adresse}\n${'─'.repeat(45)}\n`;
+  t+=`PRESTATIONS DE SERVICE\n`;
+  d.lignes.filter(l=>l.cat==='prestation').forEach(l=>{t+=`  ${l.lib}`;if(l.pct!==undefined)t+=` (avancement ${l.pct}%)`;t+=` ............. ${eur(l.mt)}\n`;});
+  t+=`  Sous-total ............. ${eur(d.totPrest)}\n\n`;
+  t+=`MATÉRIAUX ET FOURNITURES\n`;
+  d.lignes.filter(l=>l.cat==='materiau').forEach(l=>{t+=`  ${l.lib}`;if(l.pct!==undefined)t+=` (avancement ${l.pct}%)`;t+=` ............. ${eur(l.mt)}\n`;});
+  t+=`  Sous-total ............. ${eur(d.totMat)}\n`;
+  if(d.avgPct!==undefined){t+=`\nAvancement moyen : ${Math.round(d.avgPct)}%\nMontant brut facturation : ${eur(d.montantBrut)}\n`;}
+  t+=`${'─'.repeat(45)}\nTOTAL : ${eur(d.total)}\nTVA non applicable — article 293B du CGI\n`;
+  if(titre==='DEVIS'){t+=`Acompte 30% au démarrage : ${eur(d.acompte)}\n\nBon pour accord :\nDate : ________________\nSignature : ________________\n`;}
+  else if(titre==='FACTURE AVANCEMENT'){t+=`Acompte versé : ${eur(d.acompte)}\nNet à payer cette facture : ${eur(d.total)}\n`;}
+  else if(titre==='FACTURE FINALE'){
+    t+=`\nDÉDUCTIONS :\n`;
+    d.deductions.forEach(dd=>t+=`  ${dd.label} : − ${eur(dd.mt)}\n`);
+    t+=`${'─'.repeat(45)}\nSOLDE FINAL À RÉGLER : ${eur(d.solde)}\n`;
+  }
+  t+=`\nAssurance décennale : ${G.sett.assurance}\n`;
+  return t;
+}
+
+function shareWA(){window.open('https://wa.me/?text='+encodeURIComponent(G.waMsg));}
+
+function renderHist(){
+  const el=document.getElementById('histList');
+  if(!G.history.length){el.innerHTML='<div style="text-align:center;padding:2.5rem;color:#aaa;font-size:14px">Aucun document pour l\'instant</div>';return;}
+  const labels={devis:'Devis',avancement:'Avancement',finale:'Facture finale'};
+  const cls={devis:'bd',avancement:'ba',finale:'bf'};
+  el.innerHTML=G.history.map(d=>`
+    <div class="hitem">
+      <div style="flex:1">
+        <div class="htitle">${d.client} <span class="badge ${cls[d.type]||'bd'}">${labels[d.type]||d.type}</span></div>
+        <div class="hsub">N° ${d.num}${d.devisRef?' · Réf. devis '+d.devisRef:''} · ${d.date}</div>
+      </div>
+      <div class="ham">${eur(d.total)}</div>
+    </div>`).join('');
+}
+
+loadLocalSett();
+// Détection automatique du retour OAuth
+(function(){
+  const hash=window.location.hash||window.location.search;
+  if(hash&&hash.includes('access_token')){
+    const p=new URLSearchParams(hash.replace(/^[#?]/,''));
+    const token=p.get('access_token');
+    if(token){G.token=token;afterLogin();}
+  }
+})();
+</script>
+</body>
+</html>
